@@ -155,13 +155,11 @@ bool Dev_PointerLooksBad(uint64 ptr) {
     if (S_ReducedPointerSizeCheck || (HAS_Z_DRIVE_WINE_INDICATOR && !S_ForceDisableLinuxWineCheck)) {
         // dev_trace('Has Z drive / ptr: ' + Text::FormatPointer(ptr) + ' < 0x100000000 = ' + tostring(ptr < 0x100000000));
         // dev_trace('base addr end: ' + Text::FormatPointer(BASE_ADDR_END));
-        if (ptr < 0x1000000) return _RetLog(true, 'ptr < 0x1000000');
+        if (ptr < 0x1000FFFF || ptr >> 48 > 0) return _RetLog(true, 'ptr < 0x1000FFFF || ptr >> 48 > 0');
     } else {
         // dev_trace('Windows (no Z drive or forced skip) / ptr: ' + Text::FormatPointer(ptr));
         if (ptr < 0x8000000000) return _RetLog(true, 'ptr < 0x8000000000');
     }
-    // todo: something like this should fix linux (also in Dev_GetNodFromPointer)
-    // if (ptr < 0x4fff08D0) return true;
     if (ptr % 8 != 0) return _RetLog(true, 'ptr % 8 != 0');
     if (ptr == 0) return _RetLog(true, 'ptr == 0');
 
@@ -338,7 +336,7 @@ CMwNod@ Dev_GetNodFromPointer(uint64 ptr) {
     // return Dev_GetArbitraryNodAt(ptr);
     // ! testing
     if (HAS_Z_DRIVE_WINE_INDICATOR && !S_ForceDisableLinuxWineCheck) {
-        if (ptr < 0x1000000 || (IS_MEMORY_ALWAYS_ALIGNED && ptr % 8 != 0) || ptr >> 48 > 0) {
+        if (ptr < 0x1000FFFF || (IS_MEMORY_ALWAYS_ALIGNED && ptr % 8 != 0) || ptr >> 48 > 0) {
             dev_trace("get nod from ptr failed: " + Text::FormatPointer(ptr));
             return null;
         }
